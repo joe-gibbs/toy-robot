@@ -1,11 +1,25 @@
 import * as FS from "fs/promises";
 
+/**
+ * The direction that the robot can face.
+ * It's ordered in clockwise order so we can increment/decrement it when changing direction.
+ */
 enum Direction {
   NORTH,
   WEST,
   SOUTH,
   EAST,
 }
+
+/**
+ * Checks X and Y coordinates to see if they're valid, and whether we should move the robot.
+ */
+const areCoordinatesValid = (x: number, y: number) => {
+  if (x < 0 || x > 4 || y < 0 || y > 4) {
+    return false;
+  }
+  return true;
+};
 
 class Robot {
   private x: number;
@@ -21,15 +35,11 @@ class Robot {
     this.facing = Direction.NORTH;
   }
 
-  private areCoordinatesValid(x: number, y: number) {
-    if (x < 0 || x > 4 || y < 0 || y > 4) {
-      return false;
-    }
-    return true;
-  }
-
+  /**
+   * Places the robot down on the table. None of the methods work without it.
+   */
   place(x: number, y: number, f: Direction) {
-    if (this.areCoordinatesValid(x, y)) {
+    if (areCoordinatesValid(x, y)) {
       this.isOnTable = true;
       this.facing = f;
       this.x = x;
@@ -37,6 +47,9 @@ class Robot {
     }
   }
 
+  /**
+   * Moves the robot based the direction it's facing.
+   */
   move() {
     let newX = this.x;
     let newY = this.y;
@@ -57,12 +70,13 @@ class Robot {
         break;
     }
 
-    if (this.areCoordinatesValid(newX, newY)) {
+    if (areCoordinatesValid(newX, newY)) {
       this.x = newX;
       this.y = newY;
     }
   }
 
+  // Since the facing is an integer-based enum, we can add to/remove from it to rotate 90 degrees
   left() {
     if (!this.isOnTable) return;
 
@@ -85,18 +99,27 @@ class Robot {
     this.facing = facingNumber;
   }
 
+  /**
+   * Logs the location of the robot in the console.
+   */
   report() {
     if (!this.isOnTable) return;
 
-    console.log(`X: ${this.x}, Y: ${this.y}, Facing: ${this.facing}`);
+    console.log(
+      `X: ${this.x}, Y: ${this.y}, Facing: ${Direction[this.facing]}`
+    );
   }
 }
 
 /** Uses a main function to get around top-level await issue */
 const main = async () => {
+  if (!process.argv[2]) {
+    throw new Error("You must define a command file to read.");
+  }
   let robot = new Robot();
-  let commands = (await FS.readFile("./command.txt")).toString("utf-8");
+  let commands = (await FS.readFile(process.argv[2])).toString("utf-8");
 
+  //Split the command file based on newlines and iterate through
   commands.split("\n").forEach((line: string) => {
     if (line === "MOVE") {
       robot.move();
@@ -130,8 +153,9 @@ const main = async () => {
         default:
           return;
       }
-
-      robot.place(x, y, direction);
+      if (areCoordinatesValid) {
+        robot.place(x, y, direction);
+      }
     }
   });
 };
