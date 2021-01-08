@@ -5,7 +5,7 @@ Results will be printed in the terminal.
 
 ## Running
 
-Download or clone the repository, run `npm install`, then run `npm run start <FILE>` where `<FILE>` is the name of the txt document that contains a list of moves, e.g. `moveeast.txt`.
+Download or clone the repository, run `npm install`, then run `npm run start <FILE>` where `<FILE>` is the name of the txt document that contains a list of moves, e.g. `moveeast.txt`. The output will be printed to stdout.
 
 ## Test files
 
